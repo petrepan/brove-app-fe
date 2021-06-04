@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import { useSelector, useDispatch } from "react-redux";
 import { getUserLoanDetails, applyForALoan } from "../../actions/loanActions";
 import { currencyFormatter } from "../../utils/index";
@@ -35,6 +36,15 @@ const paybackInterestPerMonth = [
 
 const Loan = () => {
   const [loanAmount, setLoanAmount] = useState(1500);
+  const [percentage, setPercentage] = useState(0);
+  const [duration, setDuration] = useState("");
+  const [figure, setFigure] = useState(0);
+  const [amount, setAmount] = useState(0);
+  const [showBankModal, setShowBankModal] = useState(false);
+  const [bankList, setBankList] = useState([]);
+  const [bankCode, setBankCode] = useState("801");
+  const [accountNumber, setAccountNumber] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState("");
 
   const dispatch = useDispatch();
 
@@ -51,7 +61,32 @@ const Loan = () => {
     dispatch(getUserLoanDetails());
   }, [dispatch]);
 
-  const applyForLoan = (amount, percentage, duration, figure) => {
+  useEffect(() => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${process.env.REACT_APP_PAYSTACK_SECRET_KEY}`,
+      },
+    };
+
+    const getBank = async () => {
+      const res = await axios.get("https://api.paystack.co/bank", config);
+      setBankList(res.data.data);
+    };
+    getBank();
+  }, []);
+
+  const toggleModal = (amount, percentage, duration, figure) => {
+    setShowBankModal(true);
+    setAmount(amount);
+    setPercentage(percentage);
+    setDuration(duration);
+    setFigure(figure);
+  };
+
+  const applyForLoan = (e) => {
+    e.preventDefault();
+    setPaymentLoading(true);
     let appliedDate = Date.today().toString("MMMM dS, yyyy");
     let paybackDate = Date.parse(`today + ${figure} months`).toString(
       "MMMM dS, yyyy"
@@ -63,9 +98,12 @@ const Loan = () => {
         percentage,
         duration,
         appliedDate,
-        paybackDate
+        paybackDate,
+        bankCode,
+        accountNumber
       )
     );
+    setPaymentLoading(false);
   };
 
   return (
@@ -170,11 +208,69 @@ const Loan = () => {
                           repayment period
                         </h5>
                         <div className="flex justify-center text-center flex-wrap">
+                          {showBankModal ? (
+                            <div className="fixed top-0 left-0 bg-black opacity-1 w-full h-full z-50">
+                              <div className="flex justify-center mt-4">
+                                <form className="bg-white w-72 opacity-100 rounded p-8">
+                                  <h4 className="font-bold mb-4">
+                                    Enter your Account details
+                                  </h4>
+                                  <div className="mb-4">
+                                    <label className="block">
+                                      Account Number
+                                    </label>
+                                    <input
+                                      onChange={(e) =>
+                                        setAccountNumber(e.target.value)
+                                      }
+                                      className="border border-black w-full focus:outline-none px-1"
+                                      type="text"
+                                      required
+                                    />
+                                  </div>
+                                  <div className="mb-4">
+                                    <label className="block">Bank</label>
+                                    <select
+                                      onChange={(e) =>
+                                        setBankCode(e.target.value)
+                                      }
+                                      className="border border-black w-full">
+                                      {bankList.length &&
+                                        bankList.map((bank, i) => (
+                                          <option value={bank.code} key={i + 1}>
+                                            {bank.name}
+                                          </option>
+                                        ))}
+                                    </select>
+                                  </div>
+                                  <div>
+                                    <button
+                                      onClick={applyForLoan}
+                                      className="bg-blue-900 align-middle w-full text-white h-10 outline-none">
+                                      {paymentLoading ? (
+                                        <div className="spinner border-t-4 border-white"></div>
+                                      ) : (
+                                        "PAY"
+                                      )}
+                                    </button>
+                                  </div>
+                                </form>
+                                <div
+                                  onClick={() => setShowBankModal(false)}
+                                  className="z-50 text-white text-2xl cursor-pointer">
+                                  x
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div></div>
+                          )}
+
                           {paybackInterestPerMonth.map((loan, i) => (
                             <div key={i + 1} className="mx-4 mb-4">
                               <button
                                 onClick={() =>
-                                  applyForLoan(
+                                  toggleModal(
                                     loanAmount,
                                     loan.interest,
                                     loan.duration,

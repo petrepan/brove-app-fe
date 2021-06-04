@@ -16,7 +16,7 @@ const Login = ({ history }) => {
 
   useEffect(() => {
     if (userInfo) {
-      history.push("/");
+      history.push("/dashboard/overview");
     }
   }, [history, userInfo]);
 
@@ -80,7 +80,12 @@ const Login = ({ history }) => {
             </button>
           </div>
         </form>
-        <div className="text-center mt-4">No Account? Register <Link className="underline" to="/register">here</Link></div>
+        <div className="text-center mt-4">
+          No Account? Register{" "}
+          <Link className="underline" to="/register">
+            here
+          </Link>
+        </div>
       </div>
     </div>
   );

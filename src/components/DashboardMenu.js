@@ -17,8 +17,6 @@ const DashboardMenu = () => {
     window.location.href = "/login";
   };
 
-  console.log(showMenu);
-
   const reverseMenu = (e) => {
     dispatch(showMenuAction());
   };

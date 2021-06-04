@@ -38,7 +38,15 @@ export const getUserLoanDetails = () => async (dispatch) => {
 };
 
 export const applyForALoan =
-  (amount, percentage, duration, appliedDate, paybackDate) =>
+  (
+    amount,
+    percentage,
+    duration,
+    appliedDate,
+    paybackDate,
+    bankCode,
+    accountNumber
+  ) =>
   async (dispatch) => {
     try {
       dispatch({
@@ -51,6 +59,8 @@ export const applyForALoan =
         duration,
         appliedDate,
         paybackDate,
+        bankCode,
+        accountNumber,
       });
 
       dispatch({
