@@ -17,7 +17,7 @@ const Register = ({ history }) => {
 
   useEffect(() => {
     if (userInfo) {
-      history.push("/");
+      history.push("/dashboard/overview");
     }
   }, [history, userInfo]);
 
