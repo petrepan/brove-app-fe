@@ -39,7 +39,7 @@ export const getUserLoanDetails = () => async (dispatch) => {
 
 export const applyForALoan =
   (
-    amount,
+    amount, 
     percentage,
     duration,
     appliedDate,
